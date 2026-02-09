@@ -1,4 +1,4 @@
-#include <iostream>// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+#include <iostream>
 #include "Collezioni.h"
 #include "Note.h"
 
@@ -17,7 +17,7 @@ int main() {
     std::cout << "Collezione: " << n->getCollezione()->getName() << std::endl;
 
     casa.addNote(n);
-    // Spostata da Lavoro a Casa, ma resta in Importanti (OK!)
+    // Spostata da Lavoro a Casa, ma resta in Importanti
 
     std::cout << "\nDopo spostamento in Casa:" << std::endl;
     std::cout << "In Importanti: " << (n->isImportante() ? "Si" : "No") << std::endl;

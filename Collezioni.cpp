@@ -19,7 +19,6 @@ void Collezioni::addNote(Note* note) {
 
     if (this->isSpecial) {
         // --- CASO COLLEZIONE SPECIALI ---
-        // Se non è già presente, la aggiungiamo.
         // Non serve rimuoverla dalle altre perché la nota può stare in entrambe.
         auto it = std::find(notes.begin(), notes.end(), note);
         if (it == notes.end()) {

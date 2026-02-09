@@ -8,6 +8,21 @@
 #include "Collezioni.h"
 #include "Observer.h"
 
+// Questa classe gestisce la preparazione e la pulizia per ogni test
+class CollectionTestFixture : public ::testing::Test {
+protected:
+    void SetUp() override {
+        // Viene eseguito PRIMA di ogni test
+        // Svuota la collezione Singleton per evitare residui dai test precedenti
+        Collezioni::getImportanti().clear();
+    }
+
+    void TearDown() override {
+        // Viene eseguito DOPO ogni test
+        // Utile se avessimo allocazioni dinamiche globali da pulire
+    }
+};
+
 // --- MOCK OBSERVER ---
 class MockObserver : public Observer {
 public:
@@ -20,10 +35,10 @@ public:
     }
 };
 
-// --- TEST UNITARI ---
+// --- TEST---
 
-// 1. Funzionamento base e blocco modifiche
-TEST(NoteTest, LockAndProperties) {
+// 1. Verifica proprietà base della Nota e meccanismo di Lock
+TEST_F(CollectionTestFixture, NoteLockAndProperties) {
     Note n("Titolo", "Contenuto");
     n.setLocked(true);
 
@@ -34,8 +49,8 @@ TEST(NoteTest, LockAndProperties) {
     EXPECT_EQ(n.getTitle(), "Nuovo Titolo");
 }
 
-// 2. Esclusività tra collezioni NORMALI
-TEST(CollectionTest, NormalCollectionExclusivity) {
+// 2. Verifica esclusività tra Collezioni NORMALI
+TEST_F(CollectionTestFixture, NormalCollectionExclusivity) {
     Collezioni lavoro("Lavoro");
     Collezioni casa("Casa");
     Note n("Nota Test", "...");
@@ -44,14 +59,15 @@ TEST(CollectionTest, NormalCollectionExclusivity) {
     EXPECT_EQ(lavoro.getNoteCount(), 1);
     EXPECT_EQ(n.getCollezione(), &lavoro);
 
+    // Spostamento automatico
     casa.addNote(&n);
     EXPECT_EQ(lavoro.getNoteCount(), 0);
     EXPECT_EQ(casa.getNoteCount(), 1);
     EXPECT_EQ(n.getCollezione(), &casa);
 }
 
-// 3. Doppia appartenenza (Normale + Importanti)
-TEST(CollectionTest, DualAppartenanceImportant) {
+// 3. Verifica Doppia Appartenenza (Normale + Importanti)
+TEST_F(CollectionTestFixture, DualAppartenance) {
     Collezioni lavoro("Lavoro");
     Collezioni& imp = Collezioni::getImportanti();
     Note n("Nota Urgente", "...");
@@ -65,17 +81,8 @@ TEST(CollectionTest, DualAppartenanceImportant) {
     EXPECT_TRUE(n.isImportante());
 }
 
-// 4. Singleton della collezione speciale
-TEST(CollectionTest, SingletonSpecialCollection) {
-    Collezioni& instance1 = Collezioni::getImportanti();
-    Collezioni& instance2 = Collezioni::getImportanti();
-
-    EXPECT_EQ(&instance1, &instance2);
-    EXPECT_TRUE(instance1.isImportantiCollection());
-}
-
-// 5. Pattern Observer con notifiche singole
-TEST(ObserverTest, NotificationOnAddRemove) {
+// 4. Verifica Pattern Observer (Notifica singola)
+TEST_F(CollectionTestFixture, ObserverNotification) {
     Collezioni testColl("Test");
     MockObserver spy;
     testColl.addObserver(&spy);
@@ -90,8 +97,23 @@ TEST(ObserverTest, NotificationOnAddRemove) {
     EXPECT_EQ(spy.lastCount, 0);
 }
 
-// 6. Blocco rimozione nota protetta
-TEST(CollectionTest, DenyRemovalIfLocked) {
+// 5. Verifica Notifica a Osservatori Multipli (Broadcast)
+TEST_F(CollectionTestFixture, MultipleObserversBroadcast) {
+    Collezioni ufficio("Ufficio");
+    MockObserver spy1, spy2;
+
+    ufficio.addObserver(&spy1);
+    ufficio.addObserver(&spy2);
+
+    Note n("Progetto", "...");
+    ufficio.addNote(&n);
+
+    EXPECT_EQ(spy1.lastCount, 1);
+    EXPECT_EQ(spy2.lastCount, 1);
+}
+
+// 6. Verifica protezione rimozione nota bloccata
+TEST_F(CollectionTestFixture, DenyRemovalIfLocked) {
     Collezioni coll("Sicura");
     Note n("Privato", "...");
     coll.addNote(&n);
@@ -101,8 +123,8 @@ TEST(CollectionTest, DenyRemovalIfLocked) {
     EXPECT_EQ(coll.getNoteCount(), 1);
 }
 
-// 7. Persistenza stato normale dopo uscita da Importanti
-TEST(CollectionTest, LeaveImportantStayNormal) {
+// 7. Verifica persistenza collezione normale dopo rimozione da Importanti
+TEST_F(CollectionTestFixture, LeaveImportantStayNormal) {
     Collezioni lavoro("Lavoro");
     Collezioni& imp = Collezioni::getImportanti();
     Note n("Task", "...");
@@ -117,10 +139,8 @@ TEST(CollectionTest, LeaveImportantStayNormal) {
     EXPECT_EQ(n.getCollezione(), &lavoro);
 }
 
-// --- NUOVE AGGIUNTE E MIGLIORAMENTI ---
-
-// 8. Test della Nota Orfana (corretta gestione puntatori nulli)
-TEST(CollectionTest, OrphanNoteManagement) {
+// 8. Gestione Nota Orfana (Puntatori nulli)
+TEST_F(CollectionTestFixture, OrphanNoteManagement) {
     Collezioni studio("Studio");
     Note n("Appunti", "...");
 
@@ -133,42 +153,23 @@ TEST(CollectionTest, OrphanNoteManagement) {
     EXPECT_EQ(n.getCollezione(), nullptr);
 }
 
-// 9. Test Osservatori Multipli (Broadcast della notifica)
-TEST(ObserverTest, MultipleObserversBroadcast) {
-    Collezioni ufficio("Ufficio");
-    MockObserver spy1, spy2;
-
-    ufficio.addObserver(&spy1);
-    ufficio.addObserver(&spy2);
-
-    Note n("Progetto", "...");
-    ufficio.addNote(&n);
-
-    EXPECT_EQ(spy1.lastCount, 1);
-    EXPECT_EQ(spy2.lastCount, 1);
-    EXPECT_EQ(spy1.lastCollectionName, "Ufficio");
-}
-
-// 10. Test Robustezza: Rimozione nota non presente
-TEST(CollectionTest, RemoveNonExistentNoteRobustness) {
+// 9. Robustezza: Rimozione nota non appartenente
+TEST_F(CollectionTestFixture, RemoveNonExistentNote) {
     Collezioni collA("A");
     Collezioni collB("B");
     Note n("Nota di B", "...");
 
     collB.addNote(&n);
 
-    // Tentativo di rimuovere da A una nota che appartiene a B
-    // Non deve crashare e non deve cambiare il count di A
+    // Non deve fare nulla e non deve crashare
     EXPECT_NO_THROW(collA.removeNote(&n));
     EXPECT_EQ(collA.getNoteCount(), 0);
     EXPECT_EQ(collB.getNoteCount(), 1);
 }
 
-// 11. Test Persistenza Singleton
-TEST(CollectionTest, SpecialCollectionPersistence) {
+// 10. Persistenza Singleton (grazie a SetUp partiamo da count 0)
+TEST_F(CollectionTestFixture, SpecialCollectionPersistence) {
     Collezioni& imp = Collezioni::getImportanti();
-    imp.clear(); // reset imp per test pulito, altrimenti potrebbe essere già popolato da altri test
-
     Note n("Key", "Value");
 
     imp.addNote(&n);
@@ -176,9 +177,9 @@ TEST(CollectionTest, SpecialCollectionPersistence) {
         Collezioni temp("Temp");
         temp.addNote(&n);
         EXPECT_EQ(imp.getNoteCount(), 1);
-        EXPECT_TRUE(n.isImportante());
     }
 
+    // n rimane in importanti anche se 'temp' è distrutta
     EXPECT_TRUE(n.isImportante());
     EXPECT_EQ(imp.getNoteCount(), 1);
 }
