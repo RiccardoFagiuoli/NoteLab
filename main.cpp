@@ -23,6 +23,7 @@ int main() {
     std::cout << "In Importanti: " << (n->isImportante() ? "Si" : "No") << std::endl;
     std::cout << "Collezione: " << n->getCollezione()->getName() << std::endl;
     std::cout << "Count Lavoro: " << lavoro.getNoteCount() << std::endl; // Sarà 0
+    std::cout << "Count Casa: " << casa.getNoteCount() << std::endl; // Sarà 0
 
     delete n;
     return 0;

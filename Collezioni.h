@@ -27,6 +27,8 @@ class Collezioni {
         std::string getName() const { return name; }
         bool isImportantiCollection() const { return isSpecial; }
 
+        void clear() { notes.clear(); }
+
     private:
         std::string name;
         std::vector<Note*> notes;
