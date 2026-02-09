@@ -3,4 +3,6 @@ project(NoteLab)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(NoteLab main.cpp)
+add_executable(NoteLab main.cpp
+        Note.h
+        Note.cpp)
