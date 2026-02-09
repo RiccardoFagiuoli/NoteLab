@@ -5,30 +5,33 @@
 #ifndef NOTELAB_COLLEZIONI_H
 #define NOTELAB_COLLEZIONI_H
 
-#include "Note.h"
-#include "Observer.h"
 #include <vector>
 #include <string>
-#include <algorithm>
+#include "Note.h"
+#include "Observer.h"
 
-class Collection {
+class Collezioni {
     public:
-        Collection(std::string name);
+        Collezioni(std::string name, bool isSpecialImportant = false);
+
+        // Metodo statico per ottenere la collezione speciale unica
+        static Collezioni& getImportanti();
 
         void addNote(Note* note);
         void removeNote(Note* note);
 
-        void addObserver(Observer* obs);
-        void removeObserver(Observer* obs);
+        void addObserver(Observer* obs) { observers.push_back(obs); }
         void notify();
 
         int getNoteCount() const { return notes.size(); }
         std::string getName() const { return name; }
+        bool isImportantiCollection() const { return isSpecial; }
 
     private:
         std::string name;
         std::vector<Note*> notes;
         std::vector<Observer*> observers;
+        bool isSpecial; // Indica se è la collezione "Importanti"
 };
 
 #endif //NOTELAB_COLLEZIONI_H

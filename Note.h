@@ -6,7 +6,8 @@
 #define NOTELAB_NOTE_H
 
 #include <string>
-#include <stdexcept>
+
+class Collezioni; // Forward declaration
 
 class Note {
     public:
@@ -21,14 +22,19 @@ class Note {
         void setLocked(bool lock) { locked = lock; }
         bool isLocked() const { return locked; }
 
-        void setImportant(bool imp) { important = imp; }
-        bool isImportant() const { return important; }
+        // Nuove funzioni per tracciamento
+        void setCollezione(Collezioni* coll);
+        Collezioni* getCollezione() const { return collezione; }
+
+        void setImportante(bool imp);
+        bool isImportante() const { return importante; }
 
     private:
         std::string title;
         std::string text;
-        bool locked;
-        bool important;
+        bool locked = false;
+        bool importante = false;
+        Collezioni* collezione = nullptr;
 };
 
 #endif //NOTELAB_NOTE_H

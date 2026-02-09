@@ -5,6 +5,8 @@
 #ifndef NOTELAB_OBSERVER_H
 #define NOTELAB_OBSERVER_H
 
+#include <string>
+
 class Observer {
     public:
         virtual ~Observer() = default;
