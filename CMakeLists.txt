@@ -5,4 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(NoteLab main.cpp
         Note.h
-        Note.cpp)
+        Note.cpp
+        Observer.h
+        Collezioni.h
+        Collezioni.cpp)
