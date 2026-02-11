@@ -1,8 +1,15 @@
 #include <iostream>
 #include "Collezioni.h"
 #include "Note.h"
+#include <QApplication>
+#include "mainwindow.h"
 
-int main() {
+
+int main(int argc, char *argv[]) {
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+    /*
     Collezioni& imp = Collezioni::getImportanti();
     Collezioni lavoro("Lavoro");
     Collezioni casa("Casa");
@@ -30,6 +37,7 @@ int main() {
     std::cout << "In Importanti: " << imp.getNoteCount() << std::endl;
     std::cout << "Count Lavoro: " << lavoro.getNoteCount() << std::endl; // Sarà 0
     std::cout << "Count Casa: " << casa.getNoteCount() << std::endl; // Sarà 0
+    */
 
-    return 0;
+    return a.exec();
 }
