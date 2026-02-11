@@ -7,6 +7,16 @@
 
 Note::Note(std::string title, std::string text) : title(title), text(text) {}
 
+Note::~Note() {
+    if (collezione != nullptr) {
+        collezione->destructorRemove(this);
+    }
+
+    if (isImportante()) {
+        Collezioni::getImportanti().destructorRemove(this);
+    }
+}
+
 void Note::setTitle(const std::string& newTitle) {
     if (locked) throw std::runtime_error("Bloccata");
     title = newTitle;

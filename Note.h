@@ -12,6 +12,7 @@ class Collezioni; // Forward declaration
 class Note {
     public:
         Note(std::string title, std::string text);
+        ~Note();
 
         void setTitle(const std::string& newTitle);
         void setText(const std::string& newText);

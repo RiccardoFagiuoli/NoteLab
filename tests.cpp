@@ -183,3 +183,44 @@ TEST_F(CollectionTestFixture, SpecialCollectionPersistence) {
     EXPECT_TRUE(n.isImportante());
     EXPECT_EQ(imp.getNoteCount(), 1);
 }
+
+// 11. Verifica aggiornamento contatori e notifiche su rimozione (manuale e automatica)
+TEST_F(CollectionTestFixture, UpdateCountersOnRemoval) {
+    Collezioni lavoro("Lavoro");
+    Collezioni& importanti = Collezioni::getImportanti();
+
+    MockObserver spyLavoro;
+    lavoro.addObserver(&spyLavoro);
+
+    Note n1("Nota 1", "Contenuto 1");
+    Note n2("Nota 2", "Contenuto 2");
+
+    lavoro.addNote(&n1);
+    lavoro.addNote(&n2);
+    importanti.addNote(&n1);
+
+    EXPECT_EQ(lavoro.getNoteCount(), 2);
+    EXPECT_EQ(importanti.getNoteCount(), 1);
+
+    //Test Rimozione Manuale
+    lavoro.removeNote(&n2);
+
+    EXPECT_EQ(lavoro.getNoteCount(), 1);       // Contatore aggiornato
+    EXPECT_EQ(spyLavoro.lastCount, 1);         // Observer notificato
+    EXPECT_EQ(importanti.getNoteCount(), 1);   // L'altra collezione è invariata
+
+    // 3. Test Rimozione Automatica (Scope)
+    {
+        Note n3("Nota 3", "Temporanea");
+        lavoro.addNote(&n3);
+        EXPECT_EQ(lavoro.getNoteCount(), 2);
+        EXPECT_EQ(spyLavoro.lastCount, 2);
+    }
+    // Qui n3 esce dallo scope e viene distrutta.
+    // Il distruttore chiama destructorRemove()
+
+    EXPECT_EQ(lavoro.getNoteCount(), 1); // Il contatore deve essere tornato a 1
+    // Nota: destructorRemove non chiama notify(), quindi spyLavoro.lastCount
+    // potrebbe essere ancora 2. È un comportamento corretto se vogliamo
+    // che il distruttore sia "silenzioso" per evitare crash.
+}

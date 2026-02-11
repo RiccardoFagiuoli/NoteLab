@@ -26,5 +26,10 @@ int main() {
     std::cout << "Count Casa: " << casa.getNoteCount() << std::endl; // Sarà 0
 
     delete n;
+    std::cout << "\nDopo eliminazione nota:" << std::endl;
+    std::cout << "In Importanti: " << imp.getNoteCount() << std::endl;
+    std::cout << "Count Lavoro: " << lavoro.getNoteCount() << std::endl; // Sarà 0
+    std::cout << "Count Casa: " << casa.getNoteCount() << std::endl; // Sarà 0
+
     return 0;
 }
