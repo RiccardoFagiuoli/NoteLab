@@ -44,7 +44,7 @@
       <property name="geometry">
        <rect>
         <x>510</x>
-        <y>240</y>
+        <y>450</y>
         <width>161</width>
         <height>31</height>
        </rect>
@@ -56,9 +56,9 @@
      <widget class="QPushButton" name="btnSposta">
       <property name="geometry">
        <rect>
-        <x>690</x>
-        <y>130</y>
-        <width>91</width>
+        <x>510</x>
+        <y>240</y>
+        <width>161</width>
         <height>31</height>
        </rect>
       </property>
@@ -70,7 +70,7 @@
       <property name="geometry">
        <rect>
         <x>510</x>
-        <y>130</y>
+        <y>200</y>
         <width>161</width>
         <height>31</height>
        </rect>
@@ -110,7 +110,7 @@
       <property name="geometry">
        <rect>
         <x>510</x>
-        <y>170</y>
+        <y>380</y>
         <width>161</width>
         <height>31</height>
        </rect>
@@ -123,26 +123,13 @@
       <property name="geometry">
        <rect>
         <x>510</x>
-        <y>210</y>
+        <y>420</y>
         <width>161</width>
         <height>24</height>
        </rect>
       </property>
       <property name="text">
        <string>Sblocca/Blocca</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="btnAdd">
-      <property name="geometry">
-       <rect>
-        <x>510</x>
-        <y>280</y>
-        <width>171</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Aggiungi</string>
       </property>
      </widget>
      <widget class="QPushButton" name="btnNuovaNota">
@@ -171,6 +158,16 @@
        <string>Modifica Nota</string>
       </property>
      </widget>
+     <widget class="QTextBrowser" name="textAnteprima">
+      <property name="geometry">
+       <rect>
+        <x>700</x>
+        <y>60</y>
+        <width>311</width>
+        <height>431</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="page_1">
      <widget class="QTextEdit" name="textContenutoEditor">
@@ -178,8 +175,8 @@
        <rect>
         <x>20</x>
         <y>70</y>
-        <width>381</width>
-        <height>461</height>
+        <width>981</width>
+        <height>401</height>
        </rect>
       </property>
      </widget>
@@ -199,8 +196,8 @@
      <widget class="QPushButton" name="btnSalvaEsciEditor">
       <property name="geometry">
        <rect>
-        <x>420</x>
-        <y>70</y>
+        <x>800</x>
+        <y>490</y>
         <width>201</width>
         <height>41</height>
        </rect>
@@ -212,10 +209,10 @@
      <widget class="QPushButton" name="btnAnnullaEditor">
       <property name="geometry">
        <rect>
-        <x>420</x>
-        <y>210</y>
+        <x>30</x>
+        <y>490</y>
         <width>201</width>
-        <height>31</height>
+        <height>41</height>
        </rect>
       </property>
       <property name="text">

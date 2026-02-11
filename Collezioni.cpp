@@ -44,7 +44,7 @@ void Collezioni::addNote(Note* note) {
 }
 
 void Collezioni::removeNote(Note* note) {
-    if (note->isLocked()) throw std::runtime_error("Nota bloccata.");
+    if (note->isLocked() && !this->isSpecial) throw std::runtime_error("Nota bloccata.");
 
     auto it = std::find(notes.begin(), notes.end(), note);
     if (it != notes.end()) {
@@ -60,6 +60,7 @@ void Collezioni::removeNote(Note* note) {
 }
 
 void Collezioni::destructorRemove(Note* note) {
+    if (note->isLocked()) throw std::runtime_error("Nota bloccata.");
     auto it = std::find(notes.begin(), notes.end(), note);
     if (it != notes.end()) {
         notes.erase(it);

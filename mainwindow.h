@@ -23,24 +23,22 @@ public:
         ~MainWindow() override;
 
     private Q_SLOTS:
-        // Gestione Note
-        void on_btnAdd_clicked();
+        // Dashboard
         void on_btnDelete_clicked();
         void on_listaNote_currentRowChanged(int currentRow);
         void on_btnRendiImportante_clicked();
         void on_btnLock_clicked();
-
         void on_btnAddColl_clicked();
         void on_listaCollezioni_currentRowChanged(int currentRow);
         void on_btnSposta_clicked();
+        void on_btnNuovaNota_clicked();    // Apre l'editor vuoto
+        void on_btnModificaNota_clicked();
 
-
+        //Editor
         void on_textContenutoEditor_textChanged();
         void on_btnSalvaEsciEditor_clicked();
         void on_btnAnnullaEditor_clicked();
 
-        void on_btnNuovaNota_clicked();    // Apre l'editor vuoto
-        void on_btnModificaNota_clicked();
 
     void on_listaNote_itemDoubleClicked(QListWidgetItem *item);
 
