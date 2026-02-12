@@ -32,24 +32,63 @@ MainWindow::~MainWindow() {
 // --- AGGIORNAMENTO INTERFACCIA ---
 
 void MainWindow::updateSidebar() {
+    ui->listaCollezioni->blockSignals(true); // Evita loop di eventi
     ui->listaCollezioni->clear();
+
     for (auto const& [nome, coll] : dizionarioCollezioni) {
-        QString label = QString("%1 (%2)")
-                        .arg(QString::fromStdString(nome))
-                        .arg(coll->getNoteCount());
-        ui->listaCollezioni->addItem(label);
+        QString nomeQS = QString::fromStdString(nome);
+        QString label = QString("%1 (%2)").arg(nomeQS).arg(coll->getNoteCount());
+
+        QListWidgetItem* item = new QListWidgetItem(label);
+
+        // Salviamo il nome "puro" (senza conteggio) dentro l'item
+        item->setData(Qt::UserRole, nomeQS);
+
+        ui->listaCollezioni->addItem(item);
     }
+    ui->listaCollezioni->blockSignals(false);
 }
 
 void MainWindow::updateUI() {
+    // 1. Pulizia iniziale (come già facevi)
     ui->listaNote->clear();
     ui->textAnteprima->clear();
-    ui->textContenutoEditor->clear();
+    // ui->textContenutoEditor->clear(); // Nota: pulirlo qui potrebbe cancellare ciò che scrivi, valuta se serve davvero ogni volta
 
+    if (!collezioneAttiva) return;
+
+    // 2. Ciclo di popolamento
     for (Note* n : collezioneAttiva->getNote()) {
-        ui->listaNote->addItem(QString::fromStdString(n->getTitle()));
+        QString suffisso = "";
+
+        // Aggiungi il lucchetto se la nota è bloccata
+        if (n->isLocked()) {
+            suffisso += "🔒 ";
+        }
+        else{
+            suffisso += "🔓 ";
+        }
+
+        // Aggiungi la stella se la nota è importante
+        // (Uso n->isImportant() assumendo sia il tuo metodo, altrimenti adatta al tuo booleano)
+        if (n->isImportante()) {
+            suffisso += "⭐ ";
+        }
+
+        // 3. Creazione del pezzo della lista (QListWidgetItem)
+        // Usiamo l'item completo per poter cambiare anche il colore del testo
+        QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(n->getTitle())+ suffisso);
+
+        // 4. Stile condizionale: se è bloccata, rendiamo il titolo grigio
+        if (n->isLocked()) {
+            item->setForeground(Qt::gray);
+        }
+
+        ui->listaNote->addItem(item);
     }
-    updateSidebar(); // Aggiorna i conteggi quando cambiano le note
+
+    // 5. Aggiornamento Sidebar
+    updateSidebar();
 }
 
 void MainWindow::updateCombo() {
@@ -65,17 +104,6 @@ void MainWindow::updateCombo() {
 }
 
 // --- LOGICA NOTE ---
-/*
-void MainWindow::on_listaNote_currentRowChanged(int currentRow) {
-    if (currentRow >= 0) {
-        Note* n = collezioneAttiva->getNote()[currentRow];
-        // Blocco temporaneo dei segnali per evitare loop mentre carichiamo il testo
-        ui->textContenutoEditor->blockSignals(true);
-        ui->textContenutoEditor->setPlainText(QString::fromStdString(n->getText()));
-        ui->textContenutoEditor->blockSignals(false);
-    }
-} */
-
 void MainWindow::on_listaNote_currentRowChanged(int currentRow) {
     if (currentRow >= 0 && collezioneAttiva) {
         Note* notaSelezionata = collezioneAttiva->getNote()[currentRow];
@@ -84,7 +112,7 @@ void MainWindow::on_listaNote_currentRowChanged(int currentRow) {
         ui->textAnteprima->setPlainText(QString::fromStdString(notaSelezionata->getText()));
 
         // 2. Aggiornamento Tasto Lock (Testo dinamico)
-        ui->btnLock->setText(notaSelezionata->isLocked() ? "Sblocca" : "Blocca");
+        ui->btnLock->setText(notaSelezionata->isLocked() ? "🔓 Sblocca" : "🔒 Blocca");
 
         // 3. Aggiornamento Tasto Importante (Testo dinamico)
         Collezioni* pref = dizionarioCollezioni["Importanti"];
@@ -103,7 +131,7 @@ void MainWindow::on_listaNote_currentRowChanged(int currentRow) {
 
         // Estetica anteprima
         if (notaSelezionata->isLocked()) {
-            ui->textAnteprima->setStyleSheet("background-color: #f0f0f0; color: #888;");
+            ui->textAnteprima->setStyleSheet("background-color: #424242; color: #888;");
         } else {
             ui->textAnteprima->setStyleSheet("");
         }
@@ -146,7 +174,7 @@ void MainWindow::on_btnAddColl_clicked() {
         updateCombo();
     }
 }
-
+/*
 void MainWindow::on_btnSposta_clicked() {
     int riga = ui->listaNote->currentRow();
     if (riga < 0) return;
@@ -155,27 +183,58 @@ void MainWindow::on_btnSposta_clicked() {
     QString nomeDest = ui->comboSposta->currentText();
 
     try {
-        // Verifichiamo se la destinazione esiste nel dizionario
         if (dizionarioCollezioni.count(nomeDest.toStdString())) {
             Collezioni* destinazione = dizionarioCollezioni[nomeDest.toStdString()];
 
-            // 1. Controllo preventivo (facoltativo ma consigliato)
             if (n->isLocked()) {
                 throw std::runtime_error("Sblocca la nota prima di cambiare collezione.");
             }
 
-            // 2. Eseguiamo lo spostamento
-            // (Esempio: rimuovi dalla vecchia, aggiungi alla nuova)
-            collezioneAttiva->removeNote(n);
+            // 2. Eseguiamo lo spostamento in modo intelligente
+            // RIMUOVIAMO dalla collezione attuale solo se NON è "Tutte"
+            if (!collezioneAttiva->getIsSpecial()) {
+                collezioneAttiva->removeNote(n);
+            }
+
+            // AGGIUNGIAMO alla nuova
             destinazione->addNote(n);
 
             updateUI();
+            updateSidebar(); // Importante per aggiornare i numerini (5) -> (4)
             this->statusBar()->showMessage("Nota spostata con successo!", 3000);
         }
+    } catch (const std::runtime_error& e) {
+        QMessageBox::warning(this, "Attenzione", e.what());
     }
     catch (const std::runtime_error& e) {
         // Se la nota è bloccata, il catch intercetta l'errore e mostra il popup
         QMessageBox::warning(this, "Spostamento negato", e.what());
+    }
+}*/
+
+void MainWindow::on_btnSposta_clicked() {
+    int riga = ui->listaNote->currentRow();
+    if (riga < 0) return;
+
+    Note* n = collezioneAttiva->getNote()[riga];
+    std::string nomeDest = ui->comboSposta->currentText().toStdString();
+
+    if (collezioneAttiva->getName() == nomeDest) return;
+
+    try {
+        if (dizionarioCollezioni.count(nomeDest)) {
+            Collezioni* destinazione = dizionarioCollezioni[nomeDest];
+
+            if (n->isLocked()) throw std::runtime_error("Nota bloccata.");
+
+            // LASCIAMO FARE TUTTO A addNote
+            destinazione->addNote(n);
+
+            updateUI();
+            updateSidebar();
+        }
+    } catch (const std::runtime_error& e) {
+        QMessageBox::warning(this, "Errore", e.what());
     }
 }
 
@@ -183,8 +242,15 @@ void MainWindow::on_btnDelete_clicked() {
     int riga = ui->listaNote->currentRow();
     if (riga < 0) return;
 
-    Note* n = collezioneAttiva->getNote()[riga];
+    QMessageBox::StandardButton risposta;
+    risposta = QMessageBox::question(this, "Conferma Eliminazione",
+                                     "Sei sicuro di voler eliminare definitivamente questa nota?",
+                                     QMessageBox::Yes | QMessageBox::No);
+    if (risposta != QMessageBox::Yes) {
+        return; // L'utente ha annullato l'eliminazione
+    }
 
+    Note* n = collezioneAttiva->getNote()[riga];
     try {
         // Tentiamo la rimozione
         collezioneAttiva->destructorRemove(n);
@@ -200,31 +266,6 @@ void MainWindow::on_btnDelete_clicked() {
         // La nota è ancora lì, non è successo nulla di grave!
     }
 }
-/*
-void MainWindow::on_btnSalvaEsciEditor_clicked() {
-    std::string titolo = ui->inputTitoloEditor->text().toStdString();
-    std::string contenuto = ui->textContenutoEditor->toPlainText().toStdString();
-
-    if (notaInModifica) {
-        // Stiamo modificando una nota esistente
-        if (!notaInModifica->isLocked()) {
-            notaInModifica->setTitle(titolo);
-            notaInModifica->setText(contenuto);
-        }
-    } else {
-        // Stiamo creando una nota nuova
-        if (!titolo.empty()) {
-            Note* nuova = new Note(titolo, contenuto);
-            collezioneAttiva->addNote(nuova);
-            // La aggiungiamo anche alla collezione generale
-            if (collezioneAttiva->getName() != "Tutte") {
-                dizionarioCollezioni["Tutte"]->addNote(nuova);
-            }
-        }
-    }
-    updateUI(); // Rinfresca le liste e i conteggi
-    ui->stackedWidget->setCurrentIndex(0); // Torna alla dashboard
-}*/
 
 void MainWindow::on_btnSalvaEsciEditor_clicked() {
     std::string tit = ui->inputTitoloEditor->text().toStdString();
@@ -271,7 +312,7 @@ void MainWindow::on_btnLock_clicked() {
         n->setLocked(nuovoStato);
 
         // Aggiorna il testo del tasto (usa lo stesso nome oggetto che hai nel .ui)
-        ui->btnLock->setText(nuovoStato ? "Sblocca" : "Blocca");
+        ui->btnLock->setText(nuovoStato ? "🔓 Sblocca" : "🔒 Blocca");
 
         // Se siamo nell'editor, blocca/sblocca i campi
         if (ui->stackedWidget->currentIndex() == 1) {
@@ -281,10 +322,12 @@ void MainWindow::on_btnLock_clicked() {
 
         // Se siamo nella dashboard, l'anteprima è sempre ReadOnly,
         // ma potresti voler cambiare il colore per feedback
-        if (nuovoStato)
-            ui->textAnteprima->setStyleSheet("background-color: #eeeeee;");
-        else
+        if (nuovoStato) {
+            ui->textAnteprima->setStyleSheet("background-color: #424242;");
+        } else {
             ui->textAnteprima->setStyleSheet("");
+        }
+        updateUI();
     }
 }
 
@@ -309,6 +352,7 @@ void MainWindow::on_btnRendiImportante_clicked() {
             ui->btnRendiImportante->setText("🌟 Rimuovi Importante");
         }
         updateSidebar();
+        updateUI();
     }
 }
 
@@ -357,28 +401,47 @@ void MainWindow::on_btnModificaNota_clicked() {
     ui->textContenutoEditor->setPlainText(QString::fromStdString(n->getText()));
     ui->stackedWidget->setCurrentIndex(Pagine::EDITOR);
 }
-/*
-void MainWindow::on_btnModificaNota_clicked() {
-    int riga = ui->listaNote->currentRow();
-
-    if (riga >= 0 && collezioneAttiva) {
-        // Prendiamo la nota selezionata dalla collezione attuale
-        notaInModifica = collezioneAttiva->getNote()[riga];
-
-        // Riempiamo l'editor con i dati della nota
-        ui->inputTitoloEditor->setText(QString::fromStdString(notaInModifica->getTitle()));
-        ui->textContenutoEditor->setPlainText(QString::fromStdString(notaInModifica->getText()));
-
-        // Se la nota è bloccata, l'editor deve essere in sola lettura
-        bool isLocked = notaInModifica->isLocked();
-        ui->inputTitoloEditor->setReadOnly(isLocked);
-        ui->textContenutoEditor->setReadOnly(isLocked);
-
-        // Cambiamo schermata
-        ui->stackedWidget->setCurrentIndex(Pagine::EDITOR);
-    }
-}*/
 
 void MainWindow::on_listaNote_itemDoubleClicked(QListWidgetItem *item) {
     on_btnModificaNota_clicked();
+}
+
+void MainWindow::on_btnEliminaCollezione_clicked() {
+    std::string nomeDaEliminare = collezioneAttiva->getName();
+
+    // 1. Sicurezza: non cancellare le basi
+    if (nomeDaEliminare == "Tutte" || nomeDaEliminare == "Importanti") {
+        QMessageBox::warning(this, "Attenzione", "Non puoi eliminare questa collezione.");
+        return;
+    }
+
+    if (QMessageBox::question(this, "Conferma", "Vuoi eliminare la collezione? Le note rimarranno in 'Tutte'.") == QMessageBox::Yes) {
+
+        // 2. Eliminiamo l'oggetto dal dizionario
+        Collezioni* daCancellare = dizionarioCollezioni[nomeDaEliminare];
+        dizionarioCollezioni.erase(nomeDaEliminare);
+        delete daCancellare;
+
+        // 3. Spostiamo il puntatore logico su "Tutte"
+        collezioneAttiva = dizionarioCollezioni["Tutte"];
+
+        // 4. Aggiorniamo graficamente la lista delle collezioni (Sidebar)
+        updateSidebar();
+        updateCombo();
+
+        // 5. SELEZIONE VISIVA: Cerchiamo "Tutte" nella lista e la evidenziamo
+        // Cerchiamo l'elemento che inizia con "Tutte" (visto che ora c'è anche il conteggio)
+        for(int i = 0; i < ui->listaCollezioni->count(); ++i) {
+            QListWidgetItem* item = ui->listaCollezioni->item(i);
+            if (item->data(Qt::UserRole).toString() == "Tutte") {
+                ui->listaCollezioni->setCurrentItem(item);
+                break;
+            }
+        }
+
+        // 6. Aggiorniamo la lista delle note (ora mostrerà quelle di "Tutte")
+        updateUI();
+
+        this->statusBar()->showMessage("Collezione eliminata con successo.", 3000);
+    }
 }

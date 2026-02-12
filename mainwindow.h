@@ -33,6 +33,7 @@ public:
         void on_btnSposta_clicked();
         void on_btnNuovaNota_clicked();    // Apre l'editor vuoto
         void on_btnModificaNota_clicked();
+        void on_btnEliminaCollezione_clicked();
 
         //Editor
         void on_textContenutoEditor_textChanged();

@@ -25,7 +25,7 @@ class Collezioni {
 
         int getNoteCount() const { return notes.size(); }
         std::string getName() const { return name; }
-        bool isImportantiCollection() const { return isSpecial; }
+        bool getIsSpecial() const { return isSpecial; }
 
         void clear() { notes.clear(); }
         // Metodo per rimuovere una nota senza notificare (usato dal distruttore di Note)

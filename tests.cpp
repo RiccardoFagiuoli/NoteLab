@@ -115,14 +115,23 @@ TEST_F(CollectionTestFixture, MultipleObserversBroadcast) {
 // 6. Verifica protezione rimozione nota bloccata
 TEST_F(CollectionTestFixture, DenyRemovalIfLocked) {
     Collezioni coll("Sicura");
-    Note n("Privato", "...");
-    coll.addNote(&n);
-    n.setLocked(true);
+    // Usiamo un puntatore per simulare il comportamento reale dell'app
+    Note* n = new Note("Privato", "...");
 
-    EXPECT_THROW(coll.removeNote(&n), std::runtime_error);
+    coll.addNote(n);
+    n->setLocked(true);
+
+    // Verifichiamo che lanci std::runtime_error
+    EXPECT_THROW(coll.removeNote(n), std::runtime_error);
+
+    // Verifichiamo che la nota sia ancora lì
     EXPECT_EQ(coll.getNoteCount(), 1);
-}
 
+    // Pulizia manuale (visto che removeNote ha fallito, la nota è ancora "viva")
+    n->setLocked(false);
+    coll.removeNote(n);
+    delete n;
+}
 // 7. Verifica persistenza collezione normale dopo rimozione da Importanti
 TEST_F(CollectionTestFixture, LeaveImportantStayNormal) {
     Collezioni lavoro("Lavoro");

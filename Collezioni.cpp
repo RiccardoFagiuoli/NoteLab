@@ -16,6 +16,15 @@ Collezioni& Collezioni::getImportanti() {
 
 void Collezioni::addNote(Note* note) {
     if (!note) return;
+    /*
+    if (this->getName() == "Tutte") {
+        auto it = std::find(notes.begin(), notes.end(), note);
+        if (it == notes.end()) {
+            notes.push_back(note);
+            notify();
+        }
+        return; // IMPORTANTE: non settiamo il parent per "Tutte"
+    }*/
 
     if (this->isSpecial) {
         // --- CASO COLLEZIONE SPECIALI ---
@@ -44,6 +53,10 @@ void Collezioni::addNote(Note* note) {
 }
 
 void Collezioni::removeNote(Note* note) {
+    if (this->getName() == "Tutte") {
+        return;
+    }
+
     if (note->isLocked() && !this->isSpecial) throw std::runtime_error("Nota bloccata.");
 
     auto it = std::find(notes.begin(), notes.end(), note);
