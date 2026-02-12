@@ -174,43 +174,6 @@ void MainWindow::on_btnAddColl_clicked() {
         updateCombo();
     }
 }
-/*
-void MainWindow::on_btnSposta_clicked() {
-    int riga = ui->listaNote->currentRow();
-    if (riga < 0) return;
-
-    Note* n = collezioneAttiva->getNote()[riga];
-    QString nomeDest = ui->comboSposta->currentText();
-
-    try {
-        if (dizionarioCollezioni.count(nomeDest.toStdString())) {
-            Collezioni* destinazione = dizionarioCollezioni[nomeDest.toStdString()];
-
-            if (n->isLocked()) {
-                throw std::runtime_error("Sblocca la nota prima di cambiare collezione.");
-            }
-
-            // 2. Eseguiamo lo spostamento in modo intelligente
-            // RIMUOVIAMO dalla collezione attuale solo se NON è "Tutte"
-            if (!collezioneAttiva->getIsSpecial()) {
-                collezioneAttiva->removeNote(n);
-            }
-
-            // AGGIUNGIAMO alla nuova
-            destinazione->addNote(n);
-
-            updateUI();
-            updateSidebar(); // Importante per aggiornare i numerini (5) -> (4)
-            this->statusBar()->showMessage("Nota spostata con successo!", 3000);
-        }
-    } catch (const std::runtime_error& e) {
-        QMessageBox::warning(this, "Attenzione", e.what());
-    }
-    catch (const std::runtime_error& e) {
-        // Se la nota è bloccata, il catch intercetta l'errore e mostra il popup
-        QMessageBox::warning(this, "Spostamento negato", e.what());
-    }
-}*/
 
 void MainWindow::on_btnSposta_clicked() {
     int riga = ui->listaNote->currentRow();
