@@ -85,6 +85,9 @@
         <height>31</height>
        </rect>
       </property>
+      <property name="placeholderText">
+       <string>Nome Collezione</string>
+      </property>
      </widget>
      <widget class="QListWidget" name="listaCollezioni">
       <property name="geometry">
@@ -167,6 +170,9 @@
         <height>481</height>
        </rect>
       </property>
+      <property name="placeholderText">
+       <string>Anteprima Testo</string>
+      </property>
      </widget>
      <widget class="QPushButton" name="btnEliminaCollezione">
       <property name="geometry">
@@ -192,6 +198,9 @@
         <height>401</height>
        </rect>
       </property>
+      <property name="placeholderText">
+       <string>Testo</string>
+      </property>
      </widget>
      <widget class="QLineEdit" name="inputTitoloEditor">
       <property name="geometry">
@@ -203,6 +212,9 @@
        </rect>
       </property>
       <property name="text">
+       <string>Titolo</string>
+      </property>
+      <property name="placeholderText">
        <string>Titolo</string>
       </property>
      </widget>
