@@ -9,6 +9,7 @@
 #include <string>
 #include "Note.h"
 #include "Observer.h"
+#include <algorithm>
 
 class Collezioni {
     public:
@@ -21,6 +22,9 @@ class Collezioni {
         void removeNote(Note* note);
 
         void addObserver(Observer* obs) { observers.push_back(obs); }
+        void Collezioni::removeObserver(Observer* obs) {
+            observers.erase(std::remove(observers.begin(), observers.end(), obs), observers.end());
+        }
         void notify();
 
         int getNoteCount() const { return notes.size(); }
