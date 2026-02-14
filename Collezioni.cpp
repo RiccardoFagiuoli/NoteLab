@@ -19,6 +19,7 @@ void Collezioni::addNote(Note* note) {
 
     if (this->isSpecial) {
         // --- CASO COLLEZIONE SPECIALI ---
+        // Non serve rimuoverla dalle altre perché la nota può stare in entrambe.
         auto it = std::find(notes.begin(), notes.end(), note);
         if (it == notes.end()) {
             notes.push_back(note);
@@ -27,11 +28,17 @@ void Collezioni::addNote(Note* note) {
         }
     } else {
         // --- CASO COLLEZIONE NORMALE ---
+        // Se la nota è già in un'ALTRA collezione normale, la rimuoviamo da lì
         if (note->getCollezione() != nullptr && note->getCollezione() != this) {
             note->getCollezione()->removeNote(note);
         }
 
+        // Se non è già in questa collezione, la aggiungiamo
         auto it = std::find(notes.begin(), notes.end(), note);
+        if (this->getName() == "Tutte" && it != notes.end()) {
+            note->setCollezione(this);
+            return;
+        }
         if (it == notes.end()) {
             notes.push_back(note);
             note->setCollezione(this);
@@ -41,7 +48,11 @@ void Collezioni::addNote(Note* note) {
 }
 
 void Collezioni::removeNote(Note* note) {
-    if (note->isLocked()) throw std::runtime_error("Nota bloccata.");
+    if (this->getName() == "Tutte") {
+        return;
+    }
+
+    if (note->isLocked() && !this->isSpecial) throw std::runtime_error("Nota bloccata.");
 
     auto it = std::find(notes.begin(), notes.end(), note);
     if (it != notes.end()) {
