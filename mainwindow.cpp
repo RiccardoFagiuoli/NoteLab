@@ -27,10 +27,9 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-// --- AGGIORNAMENTO INTERFACCIA ---
 
 void MainWindow::updateSidebar() {
-    ui->listaCollezioni->blockSignals(true); // Evita loop di eventi
+    ui->listaCollezioni->blockSignals(true);
     ui->listaCollezioni->clear();
 
     for (auto const& [nome, coll] : dizionarioCollezioni) {
@@ -183,25 +182,34 @@ void MainWindow::on_btnSposta_clicked() {
 void MainWindow::on_btnDelete_clicked() {
     int riga = ui->listaNote->currentRow();
     if (riga < 0) return;
-
-    QMessageBox::StandardButton risposta;
-    risposta = QMessageBox::question(this, "Conferma Eliminazione",
-                                     "Sei sicuro di voler eliminare definitivamente questa nota?",
-                                     QMessageBox::Yes | QMessageBox::No);
-    if (risposta != QMessageBox::Yes) {
-        return;
-    }
-
     Note* n = collezioneAttiva->getNote()[riga];
-    try {
+    if (!n->isLocked()) {
+        QMessageBox::StandardButton risposta;
+        risposta = QMessageBox::question(this, "Conferma Eliminazione",
+                                         "Sei sicuro di voler eliminare definitivamente questa nota?",
+                                         QMessageBox::Yes | QMessageBox::No);
+        if (risposta != QMessageBox::Yes) {
+            return;
+        }
 
-        collezioneAttiva->destructorRemove(n);
+        try {
+            if (dizionarioCollezioni.contains("Tutte")) {
+                dizionarioCollezioni["Tutte"]->destructorRemove(n);
+            }
+            collezioneAttiva->removeNote(n);
 
-        updateUI();
-        this->statusBar()->showMessage("Nota eliminata con successo", 3000);
+            delete n;
 
-    } catch (const std::runtime_error& e) {
-        QMessageBox::critical(this, "Errore di eliminazione", e.what());
+            updateUI();
+            updateSidebar();
+            this->statusBar()->showMessage("Nota eliminata", 3000);
+
+        } catch (const std::runtime_error& e) {
+            QMessageBox::critical(this, "Errore", e.what());
+        }
+    }
+    else {
+        QMessageBox::critical(this, "Errore", "Nota Bloccata");
     }
 }
 
