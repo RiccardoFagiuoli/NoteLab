@@ -8,7 +8,6 @@
 Collezioni::Collezioni(std::string name, bool importante)
     : name(name), isSpecial(importante) {}
 
-// Implementazione Singleton per la collezione speciale
 Collezioni& Collezioni::getImportanti() {
     static Collezioni instance("Importanti", true);
     return instance;
@@ -16,15 +15,6 @@ Collezioni& Collezioni::getImportanti() {
 
 void Collezioni::addNote(Note* note) {
     if (!note) return;
-    /*
-    if (this->getName() == "Tutte") {
-        auto it = std::find(notes.begin(), notes.end(), note);
-        if (it == notes.end()) {
-            notes.push_back(note);
-            notify();
-        }
-        return; // IMPORTANTE: non settiamo il parent per "Tutte"
-    }*/
 
     if (this->isSpecial) {
         // --- CASO COLLEZIONE SPECIALI ---

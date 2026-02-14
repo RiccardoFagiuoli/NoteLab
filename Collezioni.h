@@ -28,11 +28,12 @@ class Collezioni {
         bool getIsSpecial() const { return isSpecial; }
 
         void clear() { notes.clear(); }
+
         // Metodo per rimuovere una nota senza notificare (usato dal distruttore di Note)
         void destructorRemove(Note* note);
 
         const std::vector<Note*>& getNote() const {
-            return notes; // Sostituisci 'note' con il nome del tuo vector
+            return notes;
         }
 
     private:

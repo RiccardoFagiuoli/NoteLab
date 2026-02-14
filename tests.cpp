@@ -8,19 +8,13 @@
 #include "Collezioni.h"
 #include "Observer.h"
 
-// Questa classe gestisce la preparazione e la pulizia per ogni test
 class CollectionTestFixture : public ::testing::Test {
 protected:
     void SetUp() override {
-        // Viene eseguito PRIMA di ogni test
-        // Svuota la collezione Singleton per evitare residui dai test precedenti
         Collezioni::getImportanti().clear();
     }
 
-    void TearDown() override {
-        // Viene eseguito DOPO ogni test
-        // Utile se avessimo allocazioni dinamiche globali da pulire
-    }
+    void TearDown() override {}
 };
 
 // --- MOCK OBSERVER ---
@@ -115,23 +109,21 @@ TEST_F(CollectionTestFixture, MultipleObserversBroadcast) {
 // 6. Verifica protezione rimozione nota bloccata
 TEST_F(CollectionTestFixture, DenyRemovalIfLocked) {
     Collezioni coll("Sicura");
-    // Usiamo un puntatore per simulare il comportamento reale dell'app
+
     Note* n = new Note("Privato", "...");
 
     coll.addNote(n);
     n->setLocked(true);
 
-    // Verifichiamo che lanci std::runtime_error
     EXPECT_THROW(coll.removeNote(n), std::runtime_error);
 
-    // Verifichiamo che la nota sia ancora lì
     EXPECT_EQ(coll.getNoteCount(), 1);
 
-    // Pulizia manuale (visto che removeNote ha fallito, la nota è ancora "viva")
     n->setLocked(false);
     coll.removeNote(n);
     delete n;
 }
+
 // 7. Verifica persistenza collezione normale dopo rimozione da Importanti
 TEST_F(CollectionTestFixture, LeaveImportantStayNormal) {
     Collezioni lavoro("Lavoro");
@@ -170,7 +162,6 @@ TEST_F(CollectionTestFixture, RemoveNonExistentNote) {
 
     collB.addNote(&n);
 
-    // Non deve fare nulla e non deve crashare
     EXPECT_NO_THROW(collA.removeNote(&n));
     EXPECT_EQ(collA.getNoteCount(), 0);
     EXPECT_EQ(collB.getNoteCount(), 1);
@@ -188,7 +179,6 @@ TEST_F(CollectionTestFixture, SpecialCollectionPersistence) {
         EXPECT_EQ(imp.getNoteCount(), 1);
     }
 
-    // n rimane in importanti anche se 'temp' è distrutta
     EXPECT_TRUE(n.isImportante());
     EXPECT_EQ(imp.getNoteCount(), 1);
 }
@@ -211,7 +201,6 @@ TEST_F(CollectionTestFixture, UpdateCountersOnRemoval) {
     EXPECT_EQ(lavoro.getNoteCount(), 2);
     EXPECT_EQ(importanti.getNoteCount(), 1);
 
-    //Test Rimozione Manuale
     lavoro.removeNote(&n2);
 
     EXPECT_EQ(lavoro.getNoteCount(), 1);       // Contatore aggiornato
@@ -228,8 +217,5 @@ TEST_F(CollectionTestFixture, UpdateCountersOnRemoval) {
     // Qui n3 esce dallo scope e viene distrutta.
     // Il distruttore chiama destructorRemove()
 
-    EXPECT_EQ(lavoro.getNoteCount(), 1); // Il contatore deve essere tornato a 1
-    // Nota: destructorRemove non chiama notify(), quindi spyLavoro.lastCount
-    // potrebbe essere ancora 2. È un comportamento corretto se vogliamo
-    // che il distruttore sia "silenzioso" per evitare crash.
+    EXPECT_EQ(lavoro.getNoteCount(), 1);
 }
