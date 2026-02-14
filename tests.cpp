@@ -8,19 +8,14 @@
 #include "Collezioni.h"
 #include "Observer.h"
 
-// Questa classe gestisce la preparazione e la pulizia per ogni test
+
 class CollectionTestFixture : public ::testing::Test {
 protected:
     void SetUp() override {
-        // Viene eseguito PRIMA di ogni test
-        // Svuota la collezione Singleton per evitare residui dai test precedenti
         Collezioni::getImportanti().clear();
     }
 
-    void TearDown() override {
-        // Viene eseguito DOPO ogni test
-        // Utile se avessimo allocazioni dinamiche globali da pulire
-    }
+    void TearDown() override {}
 };
 
 // --- MOCK OBSERVER ---
@@ -59,7 +54,6 @@ TEST_F(CollectionTestFixture, NormalCollectionExclusivity) {
     EXPECT_EQ(lavoro.getNoteCount(), 1);
     EXPECT_EQ(n.getCollezione(), &lavoro);
 
-    // Spostamento automatico
     casa.addNote(&n);
     EXPECT_EQ(lavoro.getNoteCount(), 0);
     EXPECT_EQ(casa.getNoteCount(), 1);
@@ -202,12 +196,11 @@ TEST_F(CollectionTestFixture, UpdateCountersOnRemoval) {
     EXPECT_EQ(lavoro.getNoteCount(), 2);
     EXPECT_EQ(importanti.getNoteCount(), 1);
 
-    //Test Rimozione Manuale
     lavoro.removeNote(&n2);
 
-    EXPECT_EQ(lavoro.getNoteCount(), 1);       // Contatore aggiornato
-    EXPECT_EQ(spyLavoro.lastCount, 1);         // Observer notificato
-    EXPECT_EQ(importanti.getNoteCount(), 1);   // L'altra collezione è invariata
+    EXPECT_EQ(lavoro.getNoteCount(), 1);
+    EXPECT_EQ(spyLavoro.lastCount, 1);
+    EXPECT_EQ(importanti.getNoteCount(), 1);
 
     // 3. Test Rimozione Automatica (Scope)
     {
@@ -219,8 +212,5 @@ TEST_F(CollectionTestFixture, UpdateCountersOnRemoval) {
     // Qui n3 esce dallo scope e viene distrutta.
     // Il distruttore chiama destructorRemove()
 
-    EXPECT_EQ(lavoro.getNoteCount(), 1); // Il contatore deve essere tornato a 1
-    // Nota: destructorRemove non chiama notify(), quindi spyLavoro.lastCount
-    // potrebbe essere ancora 2. È un comportamento corretto se vogliamo
-    // che il distruttore sia "silenzioso" per evitare crash.
+    EXPECT_EQ(lavoro.getNoteCount(), 1);
 }

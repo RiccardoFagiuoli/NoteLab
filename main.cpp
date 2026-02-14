@@ -11,13 +11,11 @@ int main() {
 
     lavoro.addNote(n);
     imp.addNote(n);
-    // Ora è in Lavoro AND Importanti (OK!)
 
     std::cout << "In Importanti: " << (n->isImportante() ? "Si" : "No") << std::endl;
     std::cout << "Collezione: " << n->getCollezione()->getName() << std::endl;
 
     casa.addNote(n);
-    // Spostata da Lavoro a Casa, ma resta in Importanti
 
     std::cout << "\nDopo spostamento in Casa:" << std::endl;
     std::cout << "In Importanti: " << (n->isImportante() ? "Si" : "No") << std::endl;

@@ -7,7 +7,7 @@
 
 #include <string>
 
-class Collezioni; // Forward declaration
+class Collezioni;
 
 class Note {
     public:
@@ -23,7 +23,6 @@ class Note {
         void setLocked(bool lock) { locked = lock; }
         bool isLocked() const { return locked; }
 
-        // Nuove funzioni per tracciamento
         void setCollezione(Collezioni* coll);
         Collezioni* getCollezione() const { return collezione; }
 
