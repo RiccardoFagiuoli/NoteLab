@@ -135,9 +135,8 @@ void MainWindow::on_textContenutoEditor_textChanged() {
 
 void MainWindow::on_listaCollezioni_currentRowChanged(int currentRow) {
     if (currentRow >= 0) {
-        // Estraiamo il nome pulito (senza il numero tra parentesi)
         QString testoItem = ui->listaCollezioni->currentItem()->text();
-        std::string nomeColl = testoItem.split(" (")[0].toStdString();
+        std::string nomeColl = ui->listaCollezioni->currentItem()->data(Qt::UserRole).toString().toStdString();
 
         collezioneAttiva = dizionarioCollezioni[nomeColl];
         updateUI();
