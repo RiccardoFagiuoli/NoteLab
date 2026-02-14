@@ -34,6 +34,10 @@ void Collezioni::addNote(Note* note) {
 
         // Se non è già in questa collezione, la aggiungiamo
         auto it = std::find(notes.begin(), notes.end(), note);
+        if (this->getName() == "Tutte" && it != notes.end()) {
+            note->setCollezione(this);
+            return;
+        }
         if (it == notes.end()) {
             notes.push_back(note);
             note->setCollezione(this);
@@ -63,16 +67,9 @@ void Collezioni::removeNote(Note* note) {
 }
 
 void Collezioni::destructorRemove(Note* note) {
-    //if (note->isLocked()) throw std::runtime_error("Nota bloccata.");
     auto it = std::find(notes.begin(), notes.end(), note);
     if (it != notes.end()) {
         notes.erase(it);
-
-        if (this->isSpecial) {
-            note->setImportante(false);
-        } else {
-            note->setCollezione(nullptr);
-        }
         notify();
     }
 }

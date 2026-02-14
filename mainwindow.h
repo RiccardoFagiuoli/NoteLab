@@ -10,17 +10,23 @@
 #include <qlistwidget.h>
 #include <string>
 #include "Collezioni.h"
+#include "Observer.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow, public Observer {
     Q_OBJECT
 
 public:
         explicit MainWindow(QWidget *parent = nullptr);
         ~MainWindow() override;
+
+        void update(int conteggio, const std::string& nomeCollezione) override {
+            updateSidebar();
+            updateUI();
+        };
 
     private Q_SLOTS:
         // Dashboard

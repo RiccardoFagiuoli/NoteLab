@@ -16,8 +16,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     dizionarioCollezioni["Tutte"] = new Collezioni("Tutte");
     dizionarioCollezioni["Importanti"] = &Collezioni::getImportanti();
 
+    dizionarioCollezioni["Tutte"]->addObserver(this);
+    dizionarioCollezioni["Importanti"]->addObserver(this);
+
     collezioneAttiva = dizionarioCollezioni["Tutte"];
 
+    ui->lblCollezioneNota->setStyleSheet("font-weight: bold; color: #3498db;");
+    ui->lblCollezioneNota->setText("Nessuna nota selezionata");
     updateSidebar();
     updateCombo();
     updateUI();
@@ -110,12 +115,18 @@ void MainWindow::on_listaNote_currentRowChanged(int currentRow) {
 
         ui->btnModificaNota->setEnabled(!notaSelezionata->isLocked());
 
+        if (notaSelezionata->getCollezione()!=nullptr) {
+            QString nomeColl = QString::fromStdString(notaSelezionata->getCollezione()->getName());
+            ui->lblCollezioneNota->setText("Collezione interna: " + nomeColl);
+        }
+
         if (notaSelezionata->isLocked()) {
             ui->textAnteprima->setStyleSheet("background-color: #424242; color: #888;");
         } else {
             ui->textAnteprima->setStyleSheet("");
         }
     } else {
+        ui->lblCollezioneNota->setText("Nessuna nota selezionata");
         ui->textAnteprima->clear();
         ui->btnModificaNota->setEnabled(false);
     }
@@ -147,6 +158,7 @@ void MainWindow::on_btnAddColl_clicked() {
     QString nome = ui->inputNuovaColl->text();
     if (!nome.isEmpty() && dizionarioCollezioni.find(nome.toStdString()) == dizionarioCollezioni.end()) {
         dizionarioCollezioni[nome.toStdString()] = new Collezioni(nome.toStdString());
+        dizionarioCollezioni[nome.toStdString()]->addObserver(this);
         ui->inputNuovaColl->clear();
         updateSidebar();
         updateCombo();
@@ -170,8 +182,8 @@ void MainWindow::on_btnSposta_clicked() {
 
             destinazione->addNote(n);
 
-            updateUI();
-            updateSidebar();
+            //(updateUI();
+            //updateSidebar();
         }
     } catch (const std::runtime_error& e) {
         QMessageBox::warning(this, "Errore", e.what());
@@ -195,12 +207,14 @@ void MainWindow::on_btnDelete_clicked() {
             if (dizionarioCollezioni.contains("Tutte")) {
                 dizionarioCollezioni["Tutte"]->destructorRemove(n);
             }
-            collezioneAttiva->removeNote(n);
+            if (n->getCollezione()!=nullptr) {
+                n->getCollezione()->destructorRemove(n);
+            }
 
             delete n;
 
-            updateUI();
-            updateSidebar();
+            //updateUI();
+            //updateSidebar();
             this->statusBar()->showMessage("Nota eliminata", 3000);
 
         } catch (const std::runtime_error& e) {
@@ -229,7 +243,7 @@ void MainWindow::on_btnSalvaEsciEditor_clicked() {
             }
         }
 
-        updateUI();
+        //updateUI();
         ui->stackedWidget->setCurrentIndex(Pagine::DASHBOARD);
 
     } catch (const std::runtime_error& e) {
