@@ -13,7 +13,9 @@ add_library(NoteCore
         Note.cpp
         Collezioni.cpp)
 
-add_executable(NoteLab main.cpp)
+add_executable(NoteLab main.cpp
+        NoteCounter.h
+)
 target_link_libraries(NoteLab NoteCore)
 
 add_executable(run_tests tests.cpp)

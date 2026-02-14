@@ -46,13 +46,12 @@ void Collezioni::removeNote(Note* note) {
     auto it = std::find(notes.begin(), notes.end(), note);
     if (it != notes.end()) {
         notes.erase(it);
-        /*
+
         if (this->isSpecial) {
             note->setImportante(false);
         } else {
             note->setCollezione(nullptr);
         }
-        */
         notify();
     }
 }
@@ -61,12 +60,12 @@ void Collezioni::destructorRemove(Note* note) {
     auto it = std::find(notes.begin(), notes.end(), note);
     if (it != notes.end()) {
         notes.erase(it);
-
+        /*
         if (this->isSpecial) {
             note->setImportante(false);
         } else {
             note->setCollezione(nullptr);
-        }
+        }*/
         notify();
     }
 }
