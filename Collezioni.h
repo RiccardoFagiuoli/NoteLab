@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 #include "Note.h"
 #include "Observer.h"
 
@@ -21,6 +22,9 @@ class Collezioni {
         void removeNote(Note* note);
 
         void addObserver(Observer* obs) { observers.push_back(obs); }
+        void removeObserver(Observer* obs) {
+            observers.erase(std::remove(observers.begin(), observers.end(), obs), observers.end());
+        }
         void notify();
 
         int getNoteCount() const { return notes.size(); }

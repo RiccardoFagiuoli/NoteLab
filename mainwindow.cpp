@@ -29,6 +29,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {
+    for (auto const& [nome, coll] : dizionarioCollezioni) {
+        coll->removeObserver(this);
+    }
+    Collezioni::getImportanti().removeObserver(this);
+
     delete ui;
 }
 
@@ -234,6 +239,7 @@ void MainWindow::on_btnSalvaEsciEditor_clicked() {
         if (notaInModifica) {
             notaInModifica->setTitle(tit);
             notaInModifica->setText(cont);
+            collezioneAttiva->notify();
         } else {
             if (!tit.empty()) {
                 Note* nuova = new Note(tit, cont);

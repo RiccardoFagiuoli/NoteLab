@@ -219,3 +219,54 @@ TEST_F(CollectionTestFixture, UpdateCountersOnRemoval) {
 
     EXPECT_EQ(lavoro.getNoteCount(), 1);
 }
+
+//12.Test sulla Collezione "Tutte"
+TEST_F(CollectionTestFixture, TutteCollectionSpecialBehavior) {
+    Collezioni tutte("Tutte");
+    Note n("Test", "...");
+    tutte.addNote(&n);
+
+    // Verifica che non si possa rimuovere da "Tutte" (se questa è la tua logica)
+    tutte.removeNote(&n);
+    EXPECT_EQ(tutte.getNoteCount(), 1);
+}
+
+//13.Test sulla rimozione dell'observer
+TEST_F(CollectionTestFixture, RemoveObserver) {
+    Collezioni coll("Test");
+    MockObserver spy;
+    coll.addObserver(&spy);
+    coll.removeObserver(&spy); // Dovresti implementare questo metodo!
+
+    Note n("N", "...");
+    coll.addNote(&n);
+
+    // Se rimosso, lastCount non deve essere cambiato (rimane al valore di inizializzazione -1)
+    EXPECT_EQ(spy.lastCount, -1);
+}
+
+//14.Test sulla gestione dei Puntatori Nulli
+TEST_F(CollectionTestFixture, NullPointerRobustness) {
+    Collezioni coll("Test");
+    EXPECT_NO_THROW(coll.addNote(nullptr));
+    EXPECT_NO_THROW(coll.removeNote(nullptr));
+    EXPECT_EQ(coll.getNoteCount(), 0);
+}
+
+//15.Verifica dello Spostamento tra Collezione Normale e Speciale
+TEST_F(CollectionTestFixture, MoveWhileInSpecial) {
+    Collezioni casa("Casa");
+    Collezioni lavoro("Lavoro");
+    Collezioni& imp = Collezioni::getImportanti();
+    Note n("Nota", "...");
+
+    casa.addNote(&n);
+    imp.addNote(&n);
+
+    lavoro.addNote(&n);
+
+    EXPECT_EQ(casa.getNoteCount(), 0);
+    EXPECT_EQ(lavoro.getNoteCount(), 1);
+    EXPECT_TRUE(n.isImportante()); // Deve rimanere importante!
+    EXPECT_EQ(imp.getNoteCount(), 1);
+}
