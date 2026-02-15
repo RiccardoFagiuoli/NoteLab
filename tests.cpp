@@ -22,10 +22,12 @@ class MockObserver : public Observer {
 public:
     int lastCount = -1;
     std::string lastCollectionName = "";
+        int callCount = 0;
 
     void update(int count, const std::string& collectionName) override {
         lastCount = count;
         lastCollectionName = collectionName;
+        callCount++;
     }
 };
 
@@ -110,18 +112,17 @@ TEST_F(CollectionTestFixture, MultipleObserversBroadcast) {
 TEST_F(CollectionTestFixture, DenyRemovalIfLocked) {
     Collezioni coll("Sicura");
 
-    Note* n = new Note("Privato", "...");
+    Note n("Privato", "...");
 
-    coll.addNote(n);
-    n->setLocked(true);
+    coll.addNote(&n);
+    n.setLocked(true);
 
-    EXPECT_THROW(coll.removeNote(n), std::runtime_error);
+    EXPECT_THROW(coll.removeNote(&n), std::runtime_error);
 
     EXPECT_EQ(coll.getNoteCount(), 1);
 
-    n->setLocked(false);
-    coll.removeNote(n);
-    delete n;
+    n.setLocked(false);
+    coll.removeNote(&n);
 }
 
 // 7. Verifica persistenza collezione normale dopo rimozione da Importanti
@@ -242,6 +243,7 @@ TEST_F(CollectionTestFixture, RemoveObserver) {
     coll.addNote(&n);
 
     // Se rimosso, lastCount non deve essere cambiato (rimane al valore di inizializzazione -1)
+    EXPECT_EQ(spy.callCount, 0);
     EXPECT_EQ(spy.lastCount, -1);
 }
 
