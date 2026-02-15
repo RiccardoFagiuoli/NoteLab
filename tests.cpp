@@ -23,10 +23,12 @@ class MockObserver : public Observer {
 public:
     int lastCount = -1;
     std::string lastCollectionName = "";
+        int callCount = 0;
 
     void update(int count, const std::string& collectionName) override {
         lastCount = count;
         lastCollectionName = collectionName;
+        callCount++;
     }
 };
 
@@ -237,6 +239,7 @@ TEST_F(CollectionTestFixture, RemoveObserver) {
     coll.addNote(&n);
 
     // Se rimosso, lastCount non deve essere cambiato (rimane al valore di inizializzazione -1)
+    EXPECT_EQ(spy.callCount, 0);
     EXPECT_EQ(spy.lastCount, -1);
 }
 
