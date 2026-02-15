@@ -365,8 +365,13 @@ void MainWindow::on_btnEliminaCollezione_clicked() {
     }
 
     if (QMessageBox::question(this, "Conferma", "Vuoi eliminare la collezione? Le note rimarranno in 'Tutte'.") == QMessageBox::Yes) {
-
         Collezioni* daCancellare = dizionarioCollezioni[nomeDaEliminare];
+        const std::vector<Note*>& noteInterne = daCancellare->getNote();
+
+        for (Note* n : noteInterne) {
+            n->setCollezione(dizionarioCollezioni["Tutte"]);
+        }
+        daCancellare->removeObserver(this);
         dizionarioCollezioni.erase(nomeDaEliminare);
         delete daCancellare;
 
