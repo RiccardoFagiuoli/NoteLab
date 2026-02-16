@@ -32,6 +32,28 @@ public:
 };
 
 // --- TEST---
+TEST_F(CollectionTestFixture, InitialStateCollezioni) {
+    Collezioni lavoro("Lavoro");
+    EXPECT_EQ(lavoro.getNoteCount(), 0);
+    EXPECT_EQ(lavoro.getName(), "Lavoro");
+    EXPECT_FALSE(lavoro.getIsSpecial());
+}
+TEST_F(CollectionTestFixture,InitialStateNote) {
+    Note n("Titolo", "Contenuto");
+    EXPECT_EQ(n.getTitle(), "Titolo");
+    EXPECT_EQ(n.getText(), "Contenuto");
+    EXPECT_FALSE(n.isLocked());
+    EXPECT_FALSE(n.isImportante());
+    EXPECT_EQ(n.getCollezione(), nullptr);
+}
+TEST_F(CollectionTestFixture, ImportantiSingleton) {
+    Collezioni& imp1 = Collezioni::getImportanti();
+    Collezioni& imp2 = Collezioni::getImportanti();
+
+    EXPECT_EQ(&imp1, &imp2);
+    EXPECT_EQ(imp1.getName(), "Importanti");
+    EXPECT_TRUE(imp1.getIsSpecial());
+}
 
 // 1. Verifica proprietà base della Nota e meccanismo di Lock
 TEST_F(CollectionTestFixture, NoteLockAndProperties) {
