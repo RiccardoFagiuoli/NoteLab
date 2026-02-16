@@ -15,7 +15,6 @@ class Collezioni {
     public:
         Collezioni(std::string name, bool isSpecialImportant = false);
 
-        // Metodo statico per ottenere la collezione speciale unica
         static Collezioni& getImportanti();
 
         Collezioni(Collezioni &other) = delete;
