@@ -34,7 +34,8 @@ class Collezioni {
         bool getIsSpecial() const { return isSpecial; }
 
         void clear() { notes.clear(); }
-        // Metodo per rimuovere una nota senza notificare (usato dal distruttore di Note)
+
+        // Metodo per rimuovere una nota  (usato dal distruttore di Note)
         void destructorRemove(Note* note);
 
     private:
