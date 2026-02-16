@@ -18,6 +18,9 @@ class Collezioni {
         // Metodo statico per ottenere la collezione speciale unica
         static Collezioni& getImportanti();
 
+        Collezioni(Collezioni &other) = delete;
+        Collezioni& operator=(Collezioni &other) = delete;
+
         void addNote(Note* note);
         void removeNote(Note* note);
 
